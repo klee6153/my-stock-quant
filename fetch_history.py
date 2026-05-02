@@ -10,6 +10,6 @@ df = yf.download("^TWII", start="1960-01-01")
 df.reset_index(inplace=True)
 
 # 存成一個獨立的檔案，方便回測使用
-df.to_csv("taiex_history_full.csv", index=False)
+df.to_csv("TAIEX_50Y.csv", index=False)
 
 print(f"歷史數據下載完成，共計 {len(df)} 筆資料！")
