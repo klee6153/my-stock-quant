@@ -2,9 +2,9 @@ name: 每日股市數據抓取
 
 on:
   schedule:
-    # 每天台灣時間下午 3:10 執行 (國際標準時 07:10)
+    # 每天台灣時間下午 3:10 執行
     - cron: '10 7 * * *'
-  workflow_dispatch: # 讓你可以手動點擊執行
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -22,9 +22,16 @@ jobs:
         run: |
           pip install yfinance pandas
 
-      - name: 執行歷史抓取腳本
+      - name: 執行每日抓取
         run: |
-          python fetch_history.py
+          python - <<EOF
+          import yfinance as yf
+          import pandas as pd
+          # 抓取加權指數最新 60 天數據
+          df = yf.download("^TWII", period="60d")
+          df.reset_index(inplace=True)
+          df.to_csv("taiex_data.csv", index=False)
+          EOF
 
       - name: 將數據存回倉庫
         run: |
