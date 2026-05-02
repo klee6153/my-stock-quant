@@ -22,21 +22,9 @@ jobs:
         run: |
           pip install yfinance pandas
 
-      - name: 執行抓取腳本
+      - name: 執行歷史抓取腳本
         run: |
-          python - <<EOF
-          import yfinance as yf
-          import pandas as pd
-          
-          # 抓取加權指數 (TAIEX) 最近 60 天數據
-          # 這裡抓取的是日線資料，體積很小，不用擔心空間
-          df = yf.download("^TWII", period="60d")
-          df.reset_index(inplace=True)
-          
-          # 存成 CSV 格式，方便 AI 讀取
-          df.to_csv("taiex_data.csv", index=False)
-          print("數據抓取成功！")
-          EOF
+          python fetch_history.py
 
       - name: 將數據存回倉庫
         run: |
