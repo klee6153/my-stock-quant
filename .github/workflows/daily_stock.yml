@@ -40,3 +40,19 @@ jobs:
           git add *.csv
           git commit -m "自動更新每日量價數據" || exit 0
           git push
+
+
+      - name: 發送通知到 Issue #1
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 1,
+              body: `📊 TAIEX 資料已於 ${{ steps.date.outputs.date }} 更新完成！
+
+              檔案位置：${{ github.server_url }}/${{ github.repository }}/blob/main/taiex_data.csv
+
+              您可以點擊上方連結下載 CSV 檔案。`
+            })
