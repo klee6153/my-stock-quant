@@ -52,7 +52,7 @@ jobs:
               issue_number: 1,
               body: `📊 TAIEX 資料已於 ${{ steps.date.outputs.date }} 更新完成！
 
-              檔案位置：${{ github.server_url }}/${{ github.repository }}/blob/main/taiex_data.csv
+              📥 一鍵下載 CSV：${{ github.server_url }}/${{ github.repository }}/raw/main/taiex_data.csv
 
               您可以點擊上方連結下載 CSV 檔案。`
             })
