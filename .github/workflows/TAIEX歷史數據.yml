@@ -52,6 +52,14 @@ jobs:
           gzip -c TAIEX_歷史數據.csv > TAIEX_歷史數據.csv.gz
           echo "壓縮完成，原始大小：$(ls -lh TAIEX_歷史數據.csv | awk '{print $5}')，壓縮後：$(ls -lh TAIEX_歷史數據.csv.gz | awk '{print $5}')"
 
+      - name: 將 CSV 檔案存回倉庫
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add TAIEX_歷史數據.csv TAIEX_歷史數據.csv.gz
+          git commit -m "自動更新 TAIEX 歷史數據" || exit 0
+          git push
+
       - name: 發送通知到 Issue #1
         uses: actions/github-script@v7
         with:
