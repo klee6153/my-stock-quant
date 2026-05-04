@@ -1,0 +1,81 @@
+name: 每日個股量價數據
+
+on:
+  schedule:
+    # 每天台灣時間下午 3:15 執行（比 TAIEX 晚 5 分鐘）
+    - cron: '15 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-stocks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 檢出倉庫內容
+        uses: actions/checkout@v4
+
+      - name: 建立個股數據資料夾
+        run: |
+          mkdir -p 個股數據
+
+      - name: 設定 Python 環境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安裝必要套件
+        run: |
+          pip install yfinance pandas
+
+      - name: 抓取三檔個股當年度數據
+        run: |
+          python - <<EOF
+          import yfinance as yf
+          import pandas as pd
+          
+          # 三檔股票代號（台股需加 .TW）
+          stocks = {
+              "2601": "2601.TW",
+              "2330": "2330.TW",
+              "2308": "2308.TW"
+          }
+          
+          for name, code in stocks.items():
+              print(f"正在抓取 {name}...")
+              df = yf.download(code, period="60d")
+              df.reset_index(inplace=True)
+              filename = f"個股數據/{name}_當年度.csv"
+              df.to_csv(filename, index=False)
+              print(f"  已儲存：{filename}，共 {len(df)} 筆")
+          
+          print("全部完成！")
+          EOF
+
+      - name: 將檔案存回倉庫
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add 個股數據/
+          git commit -m "自動更新每日個股量價數據" || exit 0
+          git push
+
+      - name: 發送通知到 Issue #1
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }).slice(0,10);
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 1,
+              body: `📊 **每日個股量價數據已更新** - ${today}
+              
+              📥 **一鍵下載（三檔股票各自獨立）**：
+              
+              1. 益航 (2601)：${{ github.server_url }}/${{ github.repository }}/raw/main/個股數據/2601_當年度.csv
+              
+              2. 台積電 (2330)：${{ github.server_url }}/${{ github.repository }}/raw/main/個股數據/2330_當年度.csv
+              
+              3. 台達電 (2308)：${{ github.server_url }}/${{ github.repository }}/raw/main/個股數據/2308_當年度.csv
+              
+              📁 所有個股檔案均存放在「個股數據」資料夾中。`
+            })
