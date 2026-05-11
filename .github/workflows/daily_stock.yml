@@ -28,7 +28,7 @@ jobs:
           import yfinance as yf
           import pandas as pd
           # 抓取加權指數最新 60 天數據
-          df = yf.download("^TWII", period="60d")
+          df = yf.download("^TWII", period="400d")
           df.reset_index(inplace=True)
           df.to_csv("taiex_data.csv", index=False)
           EOF
@@ -50,7 +50,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: 1,
-              body: `📊 TAIEX 資料已於 ${{ steps.date.outputs.date }} 更新完成！
+              body: `📊 TAIEX 資料已更新（含上一年度 + 當年度）
 
               📥 一鍵下載 CSV：${{ github.server_url }}/${{ github.repository }}/raw/main/taiex_data.csv
 
