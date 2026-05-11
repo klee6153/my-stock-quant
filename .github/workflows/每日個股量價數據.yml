@@ -41,7 +41,7 @@ jobs:
           
           for name, code in stocks.items():
               print(f"正在抓取 {name}...")
-              df = yf.download(code, period="60d")
+              df = yf.download(code, period="400d")
               df.reset_index(inplace=True)
               filename = f"個股數據/{name}_當年度.csv"
               df.to_csv(filename, index=False)
@@ -67,7 +67,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: 1,
-              body: `📊 **每日個股量價數據已更新** - ${today}
+              body: `📊 **每日個股量價數據已更新（含上一年度 + 當年度）** - ${today}
               
               📥 **一鍵下載（三檔股票各自獨立）**：
               
