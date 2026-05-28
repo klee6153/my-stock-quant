@@ -1,0 +1,104 @@
+name: 每日新聞連結
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # 上午9:00 (UTC 1:00)
+    - cron: '0 12 * * *'  # 晚上20:00 (UTC 12:00)
+  workflow_dispatch:
+    inputs:
+      stock_codes:
+        description: '股票代碼 (用逗號分隔，例如: 2330,2308,2601)'
+        required: false
+        default: '2330,2308,2601'
+      run_time:
+        description: '執行時間 (1=上午9點, 2=晚上8點)'
+        required: false
+        default: ''
+
+jobs:
+  send-news:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    
+    steps:
+      - name: 設定股票代碼
+        id: stocks
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.stock_codes }}" ]; then
+            STOCKS="${{ github.event.inputs.stock_codes }}"
+          else
+            STOCKS="2330,2308,2601"
+          fi
+          echo "stocks=$STOCKS" >> $GITHUB_OUTPUT
+
+      - name: 產生新聞連結
+        id: news
+        run: |
+          STOCKS="${{ steps.stocks.outputs.stocks }}"
+          IFS=',' read -ra CODES <<< "$STOCKS"
+          
+          NEWS_HTML=""
+          ERROR_MSG=""
+          
+          for code in "${CODES[@]}"; do
+            code=$(echo "$code" | xargs)
+            if [[ ! "$code" =~ ^[0-9]+$ ]]; then
+              ERROR_MSG="${ERROR_MSG}❌ 錯誤的股票代碼：${code}（只能包含數字）\n"
+              continue
+            fi
+            URL="https://www.google.com/search?q=${code}+股票+新聞&tbm=nws"
+            NEWS_HTML="${NEWS_HTML}<p><strong>📌 股票 ${code}</strong><br>🔗 <a href='${URL}' target='_blank'>點此查看最新新聞 (Google 搜尋)</a></p>"
+          done
+          
+          echo "news_html<<EOF" >> $GITHUB_OUTPUT
+          echo "$NEWS_HTML" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          if [ -n "$ERROR_MSG" ]; then
+            echo "error_msg<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$ERROR_MSG" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 發送通知到 Issue #1
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+            const stocks = '${{ steps.stocks.outputs.stocks }}';
+            const newsHtml = `${{ steps.news.outputs.news_html }}`;
+            const errorMsg = `${{ steps.news.outputs.error_msg }}`;
+            
+            let body = `📰 **每日新聞連結** - ${now}\n\n`;
+            body += `⏰ 執行時間：${now}\n`;
+            body += `📊 查詢股票：${stocks}\n\n`;
+            body += `---\n\n`;
+            
+            if (errorMsg && errorMsg.trim()) {
+              body += `⚠️ **發現錯誤：**\n${errorMsg}\n\n`;
+              body += `---\n\n`;
+              body += `🔧 **如何修改股票代碼？**\n`;
+              body += `1. 前往 GitHub 倉庫：https://github.com/${context.repo.owner}/${context.repo.repo}\n`;
+              body += `2. 點擊 \`.github/workflows/daily_news_links.yml\`\n`;
+              body += `3. 找到 \`STOCKS="2330,2308,2601"\` 這一行\n`;
+              body += `4. 修改成您想要的股票代碼（用逗號分隔）\n`;
+              body += `5. 點擊 \`Commit changes\` 儲存\n\n`;
+            }
+            
+            if (newsHtml && newsHtml.trim()) {
+              body += `📥 **新聞連結：**\n${newsHtml}\n`;
+            } else {
+              body += `⚠️ 無法產生新聞連結，請檢查股票代碼是否正確。\n`;
+            }
+            
+            body += `\n---\n`;
+            body += `💡 提醒：您隨時可以修改此工作流程中的股票代碼和執行時間。\n`;
+            body += `🔗 倉庫網址：https://github.com/${context.repo.owner}/${context.repo.repo}`;
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 1,
+              body: body
+            });
