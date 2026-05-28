@@ -10,10 +10,6 @@ on:
         description: '股票代碼 (用逗號分隔，例如: 2330,2308,2601)'
         required: false
         default: '2330,2308,2601'
-      run_time:
-        description: '執行時間 (1=上午9點, 2=晚上8點)'
-        required: false
-        default: ''
 
 jobs:
   send-news:
@@ -48,8 +44,7 @@ jobs:
               continue
             fi
             NEWS_HTML="${NEWS_HTML}<p><strong>📌 股票 ${code}</strong><br>"
-            NEWS_HTML="${NEWS_HTML}🔗 <a href='https://tw.stock.yahoo.com/quote/${code}' target='_blank'>Yahoo 財經新聞</a><br>"
-            NEWS_HTML="${NEWS_HTML}🔗 <a href='https://news.cnyes.com/api/app/news/search?keyword=${code}&type=stock' target='_blank'>鉅亨網新聞</a></p>"
+            NEWS_HTML="${NEWS_HTML}🔗 <a href='https://tw.stock.yahoo.com/quote/${code}' target='_blank'>Yahoo 財經 (新聞區)</a></p>"
           done
           
           echo "news_html<<EOF" >> $GITHUB_OUTPUT
