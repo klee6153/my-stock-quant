@@ -9,7 +9,7 @@ on:
       stock_codes:
         description: '股票代碼 (用逗號分隔，例如: 2330,2308,2601)'
         required: false
-        default: '2330,2881,2601'
+        default: '2889,2881,2601,2330'
 
 env:
   STOCKS: '2330,2308,2601'   # ✅ 只改這裡！刪除或增加股票代碼
