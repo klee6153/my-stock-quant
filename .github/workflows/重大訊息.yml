@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
+  permissions:
+    contents: write
+    issues: write
   fetch-news:
     runs-on: ubuntu-latest
     
