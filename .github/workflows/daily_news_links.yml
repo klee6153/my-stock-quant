@@ -47,7 +47,7 @@ jobs:
               ERROR_MSG="${ERROR_MSG}❌ 錯誤的股票代碼：${code}（只能包含數字）\n"
               continue
             fi
-            URL="https://www.google.com/search?q=${code}+股票+新聞&tbm=nws"
+            URL="https://www.google.com/search?q=${code}+股票+新聞&tbm=nws&sort=date"
             NEWS_HTML="${NEWS_HTML}<p><strong>📌 股票 ${code}</strong><br>🔗 <a href='${URL}' target='_blank'>點此查看最新新聞 (Google 搜尋)</a></p>"
           done
           
