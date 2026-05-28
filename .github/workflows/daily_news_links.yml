@@ -47,8 +47,9 @@ jobs:
               ERROR_MSG="${ERROR_MSG}❌ 錯誤的股票代碼：${code}（只能包含數字）\n"
               continue
             fi
-            URL="https://www.google.com/search?q=${code}+股票+新聞&tbm=nws&sort=date"
-            NEWS_HTML="${NEWS_HTML}<p><strong>📌 股票 ${code}</strong><br>🔗 <a href='${URL}' target='_blank'>點此查看最新新聞 (Google 搜尋)</a></p>"
+            NEWS_HTML="${NEWS_HTML}<p><strong>📌 股票 ${code}</strong><br>"
+            NEWS_HTML="${NEWS_HTML}🔗 <a href='https://tw.stock.yahoo.com/quote/${code}' target='_blank'>Yahoo 財經新聞</a><br>"
+            NEWS_HTML="${NEWS_HTML}🔗 <a href='https://news.cnyes.com/twstock/${code}' target='_blank'>鉅亨網新聞</a></p>"
           done
           
           echo "news_html<<EOF" >> $GITHUB_OUTPUT
