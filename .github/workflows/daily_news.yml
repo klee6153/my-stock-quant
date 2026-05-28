@@ -33,7 +33,7 @@ jobs:
           import pandas as pd
           from datetime import datetime
 
-          stock_code = "4416"
+          stock_code = "2330"
           url = f"https://mops.twse.com.tw/mops/web/t146sb10?stockId={stock_code}"
 
           headers = {
