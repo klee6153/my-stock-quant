@@ -9,7 +9,10 @@ on:
       stock_codes:
         description: '股票代碼 (用逗號分隔，例如: 2330,2308,2601)'
         required: false
-        default: '2330,2308,2601'
+        default: '2330,2881,2601'
+
+env:
+  STOCKS: '2330,2308,2601'   # ✅ 只改這裡！刪除或增加股票代碼
 
 jobs:
   send-news:
@@ -24,7 +27,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.stock_codes }}" ]; then
             STOCKS="${{ github.event.inputs.stock_codes }}"
           else
-            STOCKS="2330,2308,2601"
+            STOCKS="${{ env.STOCKS }}"
           fi
           echo "stocks=$STOCKS" >> $GITHUB_OUTPUT
 
@@ -77,7 +80,7 @@ jobs:
               body += `🔧 **如何修改股票代碼？**\n`;
               body += `1. 前往 GitHub 倉庫：https://github.com/${context.repo.owner}/${context.repo.repo}\n`;
               body += `2. 點擊 \`.github/workflows/daily_news_links.yml\`\n`;
-              body += `3. 找到 \`STOCKS="2330,2308,2601"\` 這一行\n`;
+              body += `3. 找到 \`STOCKS: '2330,2308,2601'\` 這一行\n`;
               body += `4. 修改成您想要的股票代碼（用逗號分隔）\n`;
               body += `5. 點擊 \`Commit changes\` 儲存\n\n`;
             }
